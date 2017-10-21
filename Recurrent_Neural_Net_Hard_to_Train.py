@@ -72,12 +72,12 @@ ITR = 10000
 
 
 # Define placeholders and variables
-X = tf.placeholder(tf.float32, [None, 784])
-H_in = tf.placeholder(tf.float32, [None, CELL_SIZE * STACK_SIZE])
+X = tf.placeholder(tf.float32, [BATCH_SIZE, UNFOLD_SIZE * CELL_SIZE])
+H_in = tf.placeholder(tf.float32, [BATCH_SIZE, CELL_SIZE * STACK_SIZE])
 # Define classifier weights
-W = tf.Variable(tf.truncated_normal([CELL_SIZE*UNFOLD_SIZE, NUM_CLASS], stddev = 0.1))
+W = tf.Variable(tf.truncated_normal([CELL_SIZE * STACK_SIZE, NUM_CLASS], stddev = 0.1))
 B = tf.Variable(tf.ones([NUM_CLASS])/10)
-Y_true = tf.placeholder(tf.float32, [None, NUM_CLASS])
+Y_true = tf.placeholder(tf.float32, [BATCH_SIZE, NUM_CLASS])
 
 
 # Define the RNN/LSTM/GRU cell
@@ -85,10 +85,10 @@ gru_cell = tf.contrib.rnn.GRUCell(CELL_SIZE)
 multi_gru_cell = tf.contrib.rnn.MultiRNNCell([gru_cell]*STACK_SIZE, state_is_tuple = False)
 X_ = tf.reshape(X, [BATCH_SIZE, UNFOLD_SIZE, CELL_SIZE])
 H_r, H = tf.nn.dynamic_rnn(multi_gru_cell, X_, initial_state = H_in)
+#print '[DEBUG] : ', H.shape
 # H_r has the list of all the hidden states: [BATCH_SIZE, UNFOLD_SIZE, CELL_SIZE] for each entry in batch, for each time instant, there is an output of cell size
 # We device the classification task as using ALL THE INTERMEDIATE STATES in H_r to collectively predict the class of the image
-H_r_essence = tf.reshape(H_r, [BATCH_SIZE, -1]) # We collect "all the data generated on the go" in the hidden states
-Y_logits = tf.add(tf.matmul(H_r_essence, W), B) # The output of this fully connected layer are defined as the logits
+Y_logits = tf.add(tf.matmul(H, W), B) # The output of this fully connected layer are defined as the logits
 Y_pred = tf.nn.softmax(Y_logits)
 class_pred = tf.argmax(Y_pred, 1)
 class_true = tf.argmax(Y_true, 1)
@@ -142,4 +142,5 @@ for itr in range(ITR):
 		print '[TESTING] 	Accuracy : ', corr_acc
 
 
-# This gets us to the performance of 1.0 as well! Well done!!
+# Indeed the training is now slower in pace!! ( :D )
+# Yet, the performance is indeed increasing and crosses the 90% accuracy mark by 800 th iteration on batch size of 128
