@@ -78,7 +78,7 @@ noise = tf.random_normal([1, LATENT_DIM])
 # print '[INFO] Noise output : ', noise.shape
 Z = mu + tf.multiply(noise, tf.exp(.5*logstd))
 # print '[INFO] Latent Vector : ', Z.shape
-H_dec = tf.nn.tanh(tf.add(tf.matmul(Z, W_dec), B_dec))
+H_dec = ttf.nn.tanh(tf.add(tf.matmul(Z, W_dec), B_dec))
 H_rec = tf.nn.softmax(tf.add(tf.matmul(H_dec, W_rec), B_rec))
 # print '[INFO] Decoder output : ', H_dec.shape
 # print '[INFO] Reconstruction output : ', H_rec.shape
@@ -123,7 +123,7 @@ H_rec = tf.nn.softmax(tf.add(tf.matmul(H_dec, W_rec), B_rec))
 # E represents how well X is generated given Z
 # \log{p(X | Z)} = \sum_{i = 1}^N X(i)\log{Z(i)} + (1 - X(i))\log{(1 - Z(i))}
 # KL(q(Z | X) || p(Z)) = -1/2*\sum_{j = 1}^J(1 + 2\log\sigma(j) - \mu(j)^2 - \sigma(j)^2)
-log_likelihood_term = tf.reduce_sum(X*tf.log(H_rec + 1e-9) + (1 - X)*tf.log(1 - H_rec + 1e-9), axis = 1)
+log_likelihood_term = tf.reduce_sum(X*tf.log(H_rec + 1e-8) + (1 - X)*tf.log(1 - H_rec + 1e-8), axis = 1)
 # print '[INFO] Log-likelihood output : ', log_likelihood_term.shape # [INFO] Log-likelihood output :  (?,)
 KL_divergence_term = -0.5*tf.reduce_sum(1 + 2*logstd - tf.pow(mu, 2) - tf.exp(2*logstd), axis = 1)
 # print '[INFO] KL-Divergence output : ', KL_divergence_term.shape # [INFO] KL-Divergence output :  (?,)

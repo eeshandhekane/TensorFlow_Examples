@@ -95,6 +95,7 @@ sess.run(init)
 
 # Training loops
 for i in range(itr):
+	print('[INFO] Iteration : ' + str(i))
 	# Get the training data
 	batch_X, batch_Y = mnist.train.next_batch(batch_size)
 	# Run the training step
